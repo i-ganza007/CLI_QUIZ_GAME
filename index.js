@@ -1,54 +1,80 @@
-import { intro, outro, text, spinner, select, multiselect } from '@clack/prompts';
+import * as p from '@clack/prompts';
 import color from 'picolors';
 
 intro('Hello, Welcome to the Football Quiz!! Test your knowledge');
 
-const QuestionArrayList = ['Sadio Mane', 'Uruguay'];
+function main(){
+    p.intro(color.bgGreen('Hello, Welcome to my football quiz!!!'));
 
-async function askQuestion() {
-    const s = spinner();
-    s.start('Loading...');
+    let results = 0;
 
-    const hattrick = await text({
-        message: 'Which player scored the fastest hat-trick in the Premier League?',
-        placeholder: 'Enter player name',
-        validate(value) {
-            if (value.length === 0) return 'Value is required';
+    const project = p.group({
+        
+        username:()=>p.text({
+            message:'What is your name ?',
+            validate:(value)=>{
+                if(value.length===0) return 'Please enter the design';
+            }
+
+            
         }
-    });
+        if (isCancel(value)) {
+            cancel('Operation cancelled.');
+            process.exit(0);
+          }
+    ),
 
-    s.stop();
-
-    const worldcup = await select({
-        message: 'Which country won the first ever World Cup in 1930?',
-        options: [
-            { value: 'Brazil', label: 'Brazil' },
-            { value: 'Germany', label: 'Germany' },
-            { value: 'Uruguay', label: 'Uruguay' }
-        ],
-        required: true
-    });
-
-    const additionalTools = await multiselect({
-        message: 'Three players share the record for most Premier League red cards (8). Who are they?',
-        options: [
-            { value: 'Viera', label: 'Viera' },
-            { value: 'Dunne', label: 'Dunne' },
-            { value: 'Ferguson', label: 'Ferguson' },
-            { value: 'Scholes', label: 'Scholes' },
-            { value: 'Cocquelin', label: 'Cocquelin' },
-        ],
-        validate(value) {
-            if (value.length === 0) return 'At least one option is required';
+        worldcup : ()=>p.text({
+            message:'Which player scored the fastest hat-trick in the Premier League?',
+            validate(value){
+                if(value.length==0 || isNaN(value)) return 'Enter a valid answer';
+            }
         }
+    
+        if (isCancel(value)) {
+            cancel('Operation cancelled.');
+            process.exit(0);
+          }
+    
+    ),
+
+        countries: () => p.multiselect({
+            message:'The 2026 World Cup will be hosted across three different countries. Can you name them?',
+            options: [
+                { value: 'United States',label:'United States' },
+                { value: 'Canada ',label:'Canada ' },
+                { value: 'Mexico',label:'Mexico' },
+                { value: 'Nicaragua',label:'Nicaragua' },
+                { value: 'Austria',label:'Austria' }
+            ],
+
+        }
+    ),
+
+        galaxy : () => p.confirm({
+            message: 'Does Cristiano Ronaldo have a galaxy named after him ?',
+        }),
+
+        topscorer : () => p.text({
+            message:'With 260 goals, who is the Premier League'/s all-time top scorer?',
+            validate(value){
+                if(value.length==0 || isNaN(value)) return 'Enter a valid answer';
+            }
+        }),
+
+
+        
+
+
+
+
     });
 
-    // You can process the answers here, e.g., displaying them
-    console.log(color.green(`Fastest hat-trick: ${hattrick}`));
-    console.log(color.green(`World Cup winner: ${worldcup}`));
-    console.log(color.green(`Red card holders: ${additionalTools.join(', ')}`));
+    {
+        onCancel: () => {
+            p.cancel('Operation cancelled.');
+            process.exit(0);
+        },
 }
-
-await askQuestion(); // Ensure to call the function
 
 outro('Thanks for playing the Football Quiz!!');
